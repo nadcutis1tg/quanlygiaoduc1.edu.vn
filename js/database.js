@@ -20,34 +20,63 @@ const Database = {
         this.initNotifications();
     },
 
-    // Khởi tạo danh sách lớp (Đại học - Mở rộng)
+    // Khởi tạo danh sách lớp (Đại học - Theo ngành và năm học)
     initClasses() {
         this.classes = [
-            // Công nghệ Thông tin - 3 lớp
-            { id: 'L001', name: 'CNTT-K18A', faculty: 'Công nghệ Thông tin', year: 1, totalStudents: 0, advisor: 'GV001' },
-            { id: 'L002', name: 'CNTT-K18B', faculty: 'Công nghệ Thông tin', year: 1, totalStudents: 0, advisor: 'GV002' },
-            { id: 'L003', name: 'CNTT-K19', faculty: 'Công nghệ Thông tin', year: 2, totalStudents: 0, advisor: 'GV003' },
+            // Công nghệ Thông tin - 3 lớp mỗi năm
+            { id: 'L001', name: 'CNTT-K21A', faculty: 'Công nghệ Thông tin', year: 4, totalStudents: 0, advisor: 'GV001' },
+            { id: 'L002', name: 'CNTT-K21B', faculty: 'Công nghệ Thông tin', year: 4, totalStudents: 0, advisor: 'GV002' },
+            { id: 'L003', name: 'CNTT-K21C', faculty: 'Công nghệ Thông tin', year: 4, totalStudents: 0, advisor: 'GV003' },
+            { id: 'L004', name: 'CNTT-K22A', faculty: 'Công nghệ Thông tin', year: 3, totalStudents: 0, advisor: 'GV004' },
+            { id: 'L005', name: 'CNTT-K22B', faculty: 'Công nghệ Thông tin', year: 3, totalStudents: 0, advisor: 'GV005' },
+            { id: 'L006', name: 'CNTT-K23A', faculty: 'Công nghệ Thông tin', year: 2, totalStudents: 0, advisor: 'GV006' },
+            { id: 'L007', name: 'CNTT-K23B', faculty: 'Công nghệ Thông tin', year: 2, totalStudents: 0, advisor: 'GV007' },
+            { id: 'L008', name: 'CNTT-K24A', faculty: 'Công nghệ Thông tin', year: 1, totalStudents: 0, advisor: 'GV008' },
+            { id: 'L009', name: 'CNTT-K24B', faculty: 'Công nghệ Thông tin', year: 1, totalStudents: 0, advisor: 'GV009' },
             
-            // Quản trị Kinh doanh - 3 lớp
-            { id: 'L004', name: 'QTKD-K18A', faculty: 'Quản trị Kinh doanh', year: 1, totalStudents: 0, advisor: 'GV004' },
-            { id: 'L005', name: 'QTKD-K18B', faculty: 'Quản trị Kinh doanh', year: 1, totalStudents: 0, advisor: 'GV005' },
-            { id: 'L006', name: 'QTKD-K19', faculty: 'Quản trị Kinh doanh', year: 2, totalStudents: 0, advisor: 'GV006' },
+            // Quản trị Kinh doanh - 2 lớp mỗi năm
+            { id: 'L010', name: 'QTKD-K21A', faculty: 'Quản trị Kinh doanh', year: 4, totalStudents: 0, advisor: 'GV010' },
+            { id: 'L011', name: 'QTKD-K21B', faculty: 'Quản trị Kinh doanh', year: 4, totalStudents: 0, advisor: 'GV011' },
+            { id: 'L012', name: 'QTKD-K22A', faculty: 'Quản trị Kinh doanh', year: 3, totalStudents: 0, advisor: 'GV012' },
+            { id: 'L013', name: 'QTKD-K22B', faculty: 'Quản trị Kinh doanh', year: 3, totalStudents: 0, advisor: 'GV013' },
+            { id: 'L014', name: 'QTKD-K23A', faculty: 'Quản trị Kinh doanh', year: 2, totalStudents: 0, advisor: 'GV014' },
+            { id: 'L015', name: 'QTKD-K23B', faculty: 'Quản trị Kinh doanh', year: 2, totalStudents: 0, advisor: 'GV015' },
+            { id: 'L016', name: 'QTKD-K24A', faculty: 'Quản trị Kinh doanh', year: 1, totalStudents: 0, advisor: 'GV016' },
+            { id: 'L017', name: 'QTKD-K24B', faculty: 'Quản trị Kinh doanh', year: 1, totalStudents: 0, advisor: 'GV017' },
             
-            // Kế toán - 2 lớp
-            { id: 'L007', name: 'KT-K18A', faculty: 'Kế toán', year: 1, totalStudents: 0, advisor: 'GV007' },
-            { id: 'L008', name: 'KT-K18B', faculty: 'Kế toán', year: 1, totalStudents: 0, advisor: 'GV008' },
+            // Kế toán - 2 lớp mỗi năm
+            { id: 'L018', name: 'KT-K21A', faculty: 'Kế toán', year: 4, totalStudents: 0, advisor: 'GV018' },
+            { id: 'L019', name: 'KT-K21B', faculty: 'Kế toán', year: 4, totalStudents: 0, advisor: 'GV019' },
+            { id: 'L020', name: 'KT-K22A', faculty: 'Kế toán', year: 3, totalStudents: 0, advisor: 'GV020' },
+            { id: 'L021', name: 'KT-K22B', faculty: 'Kế toán', year: 3, totalStudents: 0, advisor: 'GV021' },
+            { id: 'L022', name: 'KT-K23A', faculty: 'Kế toán', year: 2, totalStudents: 0, advisor: 'GV022' },
+            { id: 'L023', name: 'KT-K23B', faculty: 'Kế toán', year: 2, totalStudents: 0, advisor: 'GV023' },
+            { id: 'L024', name: 'KT-K24A', faculty: 'Kế toán', year: 1, totalStudents: 0, advisor: 'GV024' },
+            { id: 'L025', name: 'KT-K24B', faculty: 'Kế toán', year: 1, totalStudents: 0, advisor: 'GV025' },
             
-            // Ngôn ngữ Anh - 2 lớp
-            { id: 'L009', name: 'NN-K18', faculty: 'Ngôn ngữ Anh', year: 1, totalStudents: 0, advisor: 'GV009' },
-            { id: 'L010', name: 'NN-K19', faculty: 'Ngôn ngữ Anh', year: 2, totalStudents: 0, advisor: 'GV010' },
+            // Ngôn ngữ Anh - 2 lớp mỗi năm
+            { id: 'L026', name: 'NNA-K22A', faculty: 'Ngôn ngữ Anh', year: 3, totalStudents: 0, advisor: 'GV026' },
+            { id: 'L027', name: 'NNA-K22B', faculty: 'Ngôn ngữ Anh', year: 3, totalStudents: 0, advisor: 'GV027' },
+            { id: 'L028', name: 'NNA-K23A', faculty: 'Ngôn ngữ Anh', year: 2, totalStudents: 0, advisor: 'GV028' },
+            { id: 'L029', name: 'NNA-K23B', faculty: 'Ngôn ngữ Anh', year: 2, totalStudents: 0, advisor: 'GV029' },
+            { id: 'L030', name: 'NNA-K24A', faculty: 'Ngôn ngữ Anh', year: 1, totalStudents: 0, advisor: 'GV030' },
+            { id: 'L031', name: 'NNA-K24B', faculty: 'Ngôn ngữ Anh', year: 1, totalStudents: 0, advisor: 'GV031' },
             
-            // Kỹ thuật - 2 lớp
-            { id: 'L011', name: 'KT-K18', faculty: 'Kỹ thuật Cơ khí', year: 1, totalStudents: 0, advisor: 'GV011' },
-            { id: 'L012', name: 'KT-K19', faculty: 'Kỹ thuật Cơ khí', year: 2, totalStudents: 0, advisor: 'GV012' },
+            // Kỹ thuật Cơ khí - 2 lớp mỗi năm
+            { id: 'L032', name: 'KTCK-K22A', faculty: 'Kỹ thuật Cơ khí', year: 3, totalStudents: 0, advisor: 'GV032' },
+            { id: 'L033', name: 'KTCK-K22B', faculty: 'Kỹ thuật Cơ khí', year: 3, totalStudents: 0, advisor: 'GV033' },
+            { id: 'L034', name: 'KTCK-K23A', faculty: 'Kỹ thuật Cơ khí', year: 2, totalStudents: 0, advisor: 'GV034' },
+            { id: 'L035', name: 'KTCK-K23B', faculty: 'Kỹ thuật Cơ khí', year: 2, totalStudents: 0, advisor: 'GV035' },
+            { id: 'L036', name: 'KTCK-K24A', faculty: 'Kỹ thuật Cơ khí', year: 1, totalStudents: 0, advisor: 'GV036' },
+            { id: 'L037', name: 'KTCK-K24B', faculty: 'Kỹ thuật Cơ khí', year: 1, totalStudents: 0, advisor: 'GV037' },
             
-            // Y Dược - 2 lớp
-            { id: 'L013', name: 'YD-K18', faculty: 'Y Dược', year: 1, totalStudents: 0, advisor: 'GV013' },
-            { id: 'L014', name: 'YD-K19', faculty: 'Y Dược', year: 2, totalStudents: 0, advisor: 'GV014' }
+            // Y Dược - 2 lớp mỗi năm
+            { id: 'L038', name: 'YD-K22A', faculty: 'Y Dược', year: 3, totalStudents: 0, advisor: 'GV038' },
+            { id: 'L039', name: 'YD-K22B', faculty: 'Y Dược', year: 3, totalStudents: 0, advisor: 'GV039' },
+            { id: 'L040', name: 'YD-K23A', faculty: 'Y Dược', year: 2, totalStudents: 0, advisor: 'GV040' },
+            { id: 'L041', name: 'YD-K23B', faculty: 'Y Dược', year: 2, totalStudents: 0, advisor: 'GV041' },
+            { id: 'L042', name: 'YD-K24A', faculty: 'Y Dược', year: 1, totalStudents: 0, advisor: 'GV042' },
+            { id: 'L043', name: 'YD-K24B', faculty: 'Y Dược', year: 1, totalStudents: 0, advisor: 'GV043' }
         ];
     },
 
@@ -563,14 +592,70 @@ Database.initFinances = function() {
 // Khởi tạo nghiên cứu khoa học
 Database.initResearch = function() {
     const topics = [
-        'Ứng dụng AI trong giáo dục',
+        // AI & Machine Learning
+        'Ứng dụng AI trong giáo dục đại học',
+        'Machine Learning cho dự đoán kết quả học tập',
+        'Chatbot AI hỗ trợ sinh viên 24/7',
+        'Nhận diện cảm xúc sinh viên qua camera',
+        'Hệ thống gợi ý môn học thông minh',
+        
+        // Phương pháp giảng dạy
         'Phương pháp dạy học tích cực',
-        'Đánh giá năng lực học sinh',
-        'Công nghệ trong lớp học',
-        'Phát triển tư duy sáng tạo',
-        'Giáo dục STEM',
-        'Học tập trực tuyến',
-        'Quản lý lớp học hiệu quả'
+        'Lớp học đảo ngược (Flipped Classroom)',
+        'Học tập dựa trên dự án (PBL)',
+        'Gamification trong giáo dục đại học',
+        'Microlearning - Học theo mô-đun nhỏ',
+        
+        // Công nghệ giáo dục
+        'Thực tế ảo (VR) trong đào tạo y khoa',
+        'Thực tế tăng cường (AR) cho kỹ thuật',
+        'Blockchain trong quản lý bằng cấp',
+        'IoT trong phòng thí nghiệm thông minh',
+        'Cloud Computing cho giáo dục từ xa',
+        
+        // Đánh giá & Đo lường
+        'Đánh giá năng lực học sinh theo chuẩn quốc tế',
+        'E-Portfolio đánh giá tổng hợp',
+        'Phân tích học tập (Learning Analytics)',
+        'Đánh giá đồng đẳng (Peer Assessment)',
+        
+        // Học tập trực tuyến
+        'Thiết kế khóa học MOOC hiệu quả',
+        'Tương tác sinh viên trong lớp online',
+        'Chống gian lận thi trực tuyến',
+        'Adaptive Learning - Học tập thích ứng',
+        
+        // Phát triển kỹ năng
+        'Phát triển tư duy phản biện',
+        'Kỹ năng mềm cho sinh viên công nghệ',
+        'Đào tạo kỹ năng số (Digital Literacy)',
+        'Tư duy thiết kế (Design Thinking)',
+        
+        // Quản lý giáo dục
+        'Quản lý lớp học hiệu quả',
+        'Hệ thống quản lý học tập (LMS)',
+        'Big Data trong quản lý đại học',
+        'Tối ưu hóa thời khóa biểu bằng AI',
+        
+        // Nghiên cứu chuyên ngành
+        'Ứng dụng Blockchain trong tài chính',
+        'Deep Learning cho xử lý ảnh y tế',
+        'Phân tích dữ liệu lớn trong kinh doanh',
+        'Bảo mật mạng trong IoT',
+        'Năng lượng tái tạo cho khuôn viên xanh',
+        
+        // Tâm lý & Sức khỏe
+        'Sức khỏe tinh thần sinh viên',
+        'Stress và cách quản lý trong học tập',
+        'Động lực học tập của sinh viên',
+        'Hội chứng kiệt sức học đường',
+        
+        // Xu hướng mới
+        'Metaverse trong giáo dục',
+        'NFT cho chứng chỉ số',
+        'Web3 và giáo dục phi tập trung',
+        'Quantum Computing trong nghiên cứu',
+        'Sinh học tổng hợp và đạo đức'
     ];
     
     this.research = topics.map((topic, i) => ({
@@ -579,14 +664,48 @@ Database.initResearch = function() {
         author: this.teachers[Math.floor(Math.random() * this.teachers.length)].name,
         authorId: this.teachers[Math.floor(Math.random() * this.teachers.length)].id,
         status: ['Đang thực hiện', 'Hoàn thành', 'Đã xuất bản'][Math.floor(Math.random() * 3)],
-        startDate: `2024-${String(Math.floor(Math.random() * 6) + 1).padStart(2, '0')}-01`,
+        startDate: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-01`,
         progress: Math.floor(Math.random() * 100),
-        journal: ['Tạp chí Giáo dục', 'Tạp chí Khoa học', 'Tạp chí Đại học'][Math.floor(Math.random() * 3)],
-        abstract: `Nghiên cứu về ${topic.toLowerCase()} trong bối cảnh giáo dục hiện đại...`,
-        keywords: ['giáo dục', 'công nghệ', 'đổi mới'],
-        citations: Math.floor(Math.random() * 50)
+        journal: [
+            'Tạp chí Giáo dục Việt Nam',
+            'Tạp chí Khoa học & Công nghệ',
+            'Tạp chí Đại học Quốc gia',
+            'IEEE Transactions on Education',
+            'Journal of Educational Technology',
+            'International Journal of AI in Education',
+            'Computers & Education',
+            'Educational Research Review'
+        ][Math.floor(Math.random() * 8)],
+        abstract: `Nghiên cứu về ${topic.toLowerCase()} trong bối cảnh giáo dục hiện đại. Đề tài tập trung vào việc phân tích, đánh giá và đề xuất các giải pháp cải tiến...`,
+        keywords: this.generateKeywords(topic),
+        citations: Math.floor(Math.random() * 100),
+        funding: Math.random() > 0.5 ? `${Math.floor(Math.random() * 500) + 100} triệu VNĐ` : 'Chưa có',
+        collaborators: Math.floor(Math.random() * 5) + 1
     }));
 };
+
+Database.generateKeywords = function(topic) {
+    const keywordMap = {
+        'AI': ['trí tuệ nhân tạo', 'machine learning', 'deep learning'],
+        'Blockchain': ['blockchain', 'phân tán', 'bảo mật'],
+        'VR': ['thực tế ảo', 'immersive', '3D'],
+        'AR': ['thực tế tăng cường', 'mixed reality'],
+        'online': ['trực tuyến', 'e-learning', 'distance learning'],
+        'đánh giá': ['assessment', 'evaluation', 'measurement'],
+        'tâm lý': ['psychology', 'mental health', 'wellbeing'],
+        'STEM': ['khoa học', 'công nghệ', 'kỹ thuật', 'toán học']
+    };
+    
+    let keywords = ['giáo dục', 'đại học'];
+    
+    for (let [key, values] of Object.entries(keywordMap)) {
+        if (topic.includes(key)) {
+            keywords = keywords.concat(values.slice(0, 2));
+        }
+    }
+    
+    return keywords.slice(0, 5);
+}
 
 // Khởi tạo thông báo
 Database.initNotifications = function() {
