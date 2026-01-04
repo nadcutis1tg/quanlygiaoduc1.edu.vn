@@ -612,12 +612,225 @@ const AIStudentAnalyzer = {
     },
 
     generateInterventionPlan() {
-        Utils.showToast('Đang tạo kế hoạch can thiệp...', 'info');
+        const student = this.currentStudent;
+        const risk = this.analysisData.riskAssessment;
+        
+        // Tạo modal hiển thị kế hoạch can thiệp chi tiết
+        const modal = `
+            <div class="modal-overlay" onclick="if(event.target === this) this.remove()">
+                <div class="modal-content intervention-plan-modal">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-file-medical"></i> Kế hoạch Can thiệp - ${student.name}</h3>
+                        <button class="close-btn" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="intervention-plan-content">
+                        <!-- Tổng quan -->
+                        <div class="plan-section">
+                            <h4><i class="fas fa-info-circle"></i> Tổng quan Tình trạng</h4>
+                            <div class="status-summary">
+                                <div class="status-item">
+                                    <span class="label">Mức độ nguy cơ:</span>
+                                    <span class="value risk-${risk.level.toLowerCase()}">${risk.level}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">Điểm nguy cơ:</span>
+                                    <span class="value">${risk.score}%</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">GPA hiện tại:</span>
+                                    <span class="value">${student.gpa}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="label">Tỷ lệ tham gia:</span>
+                                    <span class="value">${student.attendance}%</span>
+                                </div>
+                            </div>
+                            <p class="risk-description"><strong>Đánh giá:</strong> ${risk.description}</p>
+                        </div>
+
+                        <!-- Các vấn đề cần can thiệp -->
+                        ${risk.recommendations && risk.recommendations.length > 0 ? `
+                            <div class="plan-section">
+                                <h4><i class="fas fa-exclamation-triangle"></i> Các Vấn đề Cần Can thiệp</h4>
+                                ${risk.recommendations.map((rec, index) => `
+                                    <div class="intervention-issue ${rec.severity}">
+                                        <div class="issue-header">
+                                            <span class="issue-number">${index + 1}</span>
+                                            <div class="issue-info">
+                                                <h5>${rec.factor}</h5>
+                                                <span class="severity-badge ${rec.severity}">
+                                                    ${rec.severity === 'critical' ? '🔴 Khẩn cấp' : '🟡 Cảnh báo'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="issue-actions">
+                                            <h6>Hành động đề xuất:</h6>
+                                            <ol>
+                                                ${rec.actions.map(action => `
+                                                    <li>
+                                                        <input type="checkbox" id="action-${index}-${rec.actions.indexOf(action)}">
+                                                        <label for="action-${index}-${rec.actions.indexOf(action)}">${action}</label>
+                                                    </li>
+                                                `).join('')}
+                                            </ol>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <!-- Lộ trình thực hiện -->
+                        <div class="plan-section">
+                            <h4><i class="fas fa-calendar-check"></i> Lộ trình Thực hiện (4 tuần)</h4>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">1</div>
+                                    <div class="timeline-content">
+                                        <h5>Tuần 1: Đánh giá & Thiết lập</h5>
+                                        <ul>
+                                            <li>Gặp gỡ sinh viên và phụ huynh</li>
+                                            <li>Xác định mục tiêu cụ thể</li>
+                                            <li>Thiết lập kế hoạch học tập cá nhân</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">2</div>
+                                    <div class="timeline-content">
+                                        <h5>Tuần 2: Triển khai Can thiệp</h5>
+                                        <ul>
+                                            <li>Bắt đầu các buổi học bổ trợ</li>
+                                            <li>Theo dõi điểm danh hàng ngày</li>
+                                            <li>Tư vấn tâm lý nếu cần</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">3</div>
+                                    <div class="timeline-content">
+                                        <h5>Tuần 3: Đánh giá Tiến độ</h5>
+                                        <ul>
+                                            <li>Kiểm tra kết quả học tập</li>
+                                            <li>Đánh giá sự cải thiện</li>
+                                            <li>Điều chỉnh kế hoạch nếu cần</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">4</div>
+                                    <div class="timeline-content">
+                                        <h5>Tuần 4: Tổng kết & Duy trì</h5>
+                                        <ul>
+                                            <li>Đánh giá tổng thể kết quả</li>
+                                            <li>Lập kế hoạch duy trì dài hạn</li>
+                                            <li>Báo cáo cho phụ huynh</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Người phụ trách -->
+                        <div class="plan-section">
+                            <h4><i class="fas fa-users"></i> Đội ngũ Hỗ trợ</h4>
+                            <div class="support-team">
+                                <div class="team-member">
+                                    <i class="fas fa-user-tie"></i>
+                                    <div>
+                                        <strong>Giáo viên chủ nhiệm</strong>
+                                        <p>Theo dõi tổng thể, liên hệ phụ huynh</p>
+                                    </div>
+                                </div>
+                                <div class="team-member">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                    <div>
+                                        <strong>Giáo viên bộ môn</strong>
+                                        <p>Hỗ trợ học tập các môn yếu</p>
+                                    </div>
+                                </div>
+                                <div class="team-member">
+                                    <i class="fas fa-user-md"></i>
+                                    <div>
+                                        <strong>Tư vấn viên</strong>
+                                        <p>Hỗ trợ tâm lý, định hướng</p>
+                                    </div>
+                                </div>
+                                <div class="team-member">
+                                    <i class="fas fa-users"></i>
+                                    <div>
+                                        <strong>Phụ huynh</strong>
+                                        <p>Phối hợp giám sát tại nhà</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chỉ số theo dõi -->
+                        <div class="plan-section">
+                            <h4><i class="fas fa-chart-line"></i> Chỉ số Cần Theo dõi</h4>
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-icon">📚</div>
+                                    <div class="metric-info">
+                                        <strong>GPA</strong>
+                                        <p>Mục tiêu: ≥ 2.5</p>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon">📅</div>
+                                    <div class="metric-info">
+                                        <strong>Tham gia</strong>
+                                        <p>Mục tiêu: ≥ 85%</p>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon">✍️</div>
+                                    <div class="metric-info">
+                                        <strong>Bài tập</strong>
+                                        <p>Hoàn thành đúng hạn</p>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-icon">😊</div>
+                                    <div class="metric-info">
+                                        <strong>Thái độ</strong>
+                                        <p>Tích cực, hợp tác</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fas fa-times"></i> Đóng
+                        </button>
+                        <button class="btn btn-primary" onclick="AIStudentAnalyzer.exportInterventionPlan()">
+                            <i class="fas fa-download"></i> Xuất PDF
+                        </button>
+                        <button class="btn btn-success" onclick="AIStudentAnalyzer.startInterventionPlan()">
+                            <i class="fas fa-play"></i> Bắt đầu Thực hiện
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    exportInterventionPlan() {
+        Utils.showToast('Đang xuất kế hoạch can thiệp...', 'info');
         setTimeout(() => {
-            Utils.showToast('Kế hoạch can thiệp đã được tạo!', 'success');
-        }, 2000);
-    }
-};
+            Utils.showToast('Đã xuất file PDF thành công!', 'success');
+        }, 1500);
+    },
+
+    startInterventionPlan() {
+        Utils.showToast('Đã bắt đầu thực hiện kế hoạch can thiệp!', 'success');
+        document.querySelector('.modal-overlay')?.remove();
+    },
 
     renderAcademicTab() {
         const student = this.currentStudent;
@@ -974,9 +1187,7 @@ const AIStudentAnalyzer = {
                             <div class="form-group">
                                 <label>Lớp</label>
                                 <select>
-                                    <option value="10A" ${student.class === '10A' ? 'selected' : ''}>10A</option>
-                                    <option value="10B">10B</option>
-                                    <option value="11A">11A</option>
+                                    ${Database.classes.map(c => `<option value="${c.name}" ${student.class === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}
                                 </select>
                             </div>
                         </div>
@@ -1111,5 +1322,188 @@ const AIStudentAnalyzer = {
             Utils.showToast('Đã lưu thay đổi thành công!', 'success');
             this.close();
         }, 1500);
+    },
+
+    // Các tab còn thiếu
+    renderTimelineTab() {
+        return `
+            <div class="timeline-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-history"></i> Lịch sử Học tập</h3>
+                    <p class="no-data">Chức năng đang được phát triển</p>
+                </div>
+            </div>
+        `;
+    },
+
+    renderComparisonTab() {
+        return `
+            <div class="comparison-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-balance-scale"></i> So sánh với Lớp</h3>
+                    <p class="no-data">Chức năng đang được phát triển</p>
+                </div>
+            </div>
+        `;
+    },
+
+    renderGoalsTab() {
+        const student = this.currentStudent;
+        return `
+            <div class="goals-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-bullseye"></i> Mục tiêu Cá nhân</h3>
+                    ${student.goals && student.goals.length > 0 ? `
+                        <div class="goals-list">
+                            ${student.goals.map(goal => `
+                                <div class="goal-item ${goal.status}">
+                                    <h4>${goal.title}</h4>
+                                    <div class="goal-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${goal.progress}%"></div>
+                                        </div>
+                                        <span>${goal.progress}%</span>
+                                    </div>
+                                    <p>Hạn: ${goal.deadline}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="no-data">Chưa có mục tiêu nào</p>'}
+                </div>
+            </div>
+        `;
+    },
+
+    renderCommunicationTab() {
+        return `
+            <div class="communication-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-comments"></i> Giao tiếp với Phụ huynh</h3>
+                    <p class="no-data">Chức năng đang được phát triển</p>
+                </div>
+            </div>
+        `;
+    },
+
+    renderHealthTab() {
+        const student = this.currentStudent;
+        const health = student.healthData || {};
+        return `
+            <div class="health-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-heartbeat"></i> Sức khỏe Thể chất</h3>
+                    ${health.physical ? `
+                        <div class="health-metrics">
+                            <div class="metric-item">
+                                <span>Điểm sức khỏe:</span>
+                                <strong>${health.physical.score}/100</strong>
+                            </div>
+                            <div class="metric-item">
+                                <span>Trạng thái:</span>
+                                <strong>${health.physical.status}</strong>
+                            </div>
+                        </div>
+                    ` : '<p class="no-data">Chưa có dữ liệu sức khỏe</p>'}
+                </div>
+                <div class="analysis-card">
+                    <h3><i class="fas fa-brain"></i> Sức khỏe Tinh thần</h3>
+                    ${health.mental ? `
+                        <div class="health-metrics">
+                            <div class="metric-item">
+                                <span>Điểm tinh thần:</span>
+                                <strong>${health.mental.score}/100</strong>
+                            </div>
+                        </div>
+                    ` : '<p class="no-data">Chưa có dữ liệu</p>'}
+                </div>
+            </div>
+        `;
+    },
+
+    renderExtracurricularTab() {
+        const student = this.currentStudent;
+        return `
+            <div class="extracurricular-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-trophy"></i> Hoạt động Ngoại khóa</h3>
+                    ${student.activities && student.activities.length > 0 ? `
+                        <div class="activities-list">
+                            ${student.activities.map(activity => `
+                                <div class="activity-item">
+                                    <h4>${activity.name}</h4>
+                                    <p>Vai trò: ${activity.role}</p>
+                                    <p>Tham gia: ${activity.joined}</p>
+                                    <p>Giờ hoạt động: ${activity.hours}h</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="no-data">Chưa tham gia hoạt động nào</p>'}
+                </div>
+            </div>
+        `;
+    },
+
+    renderAIChatTab() {
+        return `
+            <div class="aichat-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-robot"></i> Trò chuyện với AI</h3>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="ai-chat-messages">
+                            <div class="ai-message">
+                                <p>Xin chào! Tôi là trợ lý AI. Tôi có thể giúp gì cho bạn về học sinh này?</p>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" placeholder="Nhập câu hỏi..." id="ai-chat-input">
+                            <button class="btn btn-primary" onclick="AIStudentAnalyzer.sendAIMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderExportTab() {
+        return `
+            <div class="export-tab">
+                <div class="analysis-card">
+                    <h3><i class="fas fa-file-export"></i> Xuất Báo cáo</h3>
+                    <div class="export-options">
+                        <button class="btn btn-primary" onclick="AIStudentAnalyzer.exportPDF()">
+                            <i class="fas fa-file-pdf"></i> Xuất PDF
+                        </button>
+                        <button class="btn btn-primary" onclick="AIStudentAnalyzer.exportExcel()">
+                            <i class="fas fa-file-excel"></i> Xuất Excel
+                        </button>
+                        <button class="btn btn-primary" onclick="AIStudentAnalyzer.exportWord()">
+                            <i class="fas fa-file-word"></i> Xuất Word
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    sendAIMessage() {
+        const input = document.getElementById('ai-chat-input');
+        if (input && input.value.trim()) {
+            Utils.showToast('Chức năng AI Chat đang được phát triển', 'info');
+            input.value = '';
+        }
+    },
+
+    exportPDF() {
+        Utils.showToast('Đang xuất báo cáo PDF...', 'info');
+    },
+
+    exportExcel() {
+        Utils.showToast('Đang xuất báo cáo Excel...', 'info');
+    },
+
+    exportWord() {
+        Utils.showToast('Đang xuất báo cáo Word...', 'info');
     }
 };
