@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Database - EduManager Pro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info li {
+            margin: 5px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button.secondary {
+            background: #6c757d;
+        }
+        button.secondary:hover {
+            background: #5a6268;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Reset Database</h1>
+        <p>Xóa dữ liệu cũ và tạo lại database mới với:</p>
+        
+        <div class="info">
+            <h3>📊 Dữ liệu mới:</h3>
+            <ul>
+                <li><strong>980 Sinh viên</strong> (70 sinh viên x 14 lớp)</li>
+                <li><strong>105 Giảng viên</strong> (7 khoa)</li>
+                <li><strong>14 Lớp</strong> (6 khoa)</li>
+                <li><strong>Thời khóa biểu</strong> đầy đủ</li>
+                <li><strong>Tài chính</strong> 12 tháng</li>
+                <li><strong>Nghiên cứu</strong> khoa học</li>
+            </ul>
+            
+            <h3>✨ Cải tiến:</h3>
+            <ul>
+                <li>✅ Attendance tự động từ hoạt động</li>
+                <li>✅ Risk Assessment chính xác</li>
+                <li>✅ Recommendations cụ thể</li>
+                <li>✅ Bỏ đánh giá sao giảng viên</li>
+                <li>✅ Môn học đại học</li>
+            </ul>
+        </div>
+        
+        <button onclick="resetDatabase()">🗑️ Xóa & Tạo lại Database</button>
+        <button class="secondary" onclick="window.location.href='index.html'">← Quay lại</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function resetDatabase() {
+            if (confirm('Bạn có chắc muốn xóa TẤT CẢ dữ liệu và tạo lại không?')) {
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Show success
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        ✅ Đã xóa database cũ!<br>
+                        Đang chuyển đến trang chủ để tạo database mới...
+                    </div>
+                `;
+                
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
