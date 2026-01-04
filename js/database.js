@@ -422,6 +422,29 @@ const Database = {
 // Initialize database khi load trang
 if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', () => {
+        // Kiểm tra và xóa dữ liệu cũ nếu có lớp 10, 11, 12
+        const oldData = localStorage.getItem('edumanager_students');
+        if (oldData) {
+            try {
+                const students = JSON.parse(oldData);
+                const hasOldClass = students.some(s => 
+                    s.class && (s.class.includes('10A') || s.class.includes('11A') || s.class.includes('12A') ||
+                               s.class.includes('10B') || s.class.includes('11B') || s.class.includes('12B'))
+                );
+                
+                if (hasOldClass) {
+                    console.log('🔄 Phát hiện dữ liệu cũ (lớp 10, 11, 12). Đang xóa và tạo lại...');
+                    localStorage.clear();
+                    Database.init();
+                    Database.saveToLocalStorage();
+                    console.log('✅ Đã tạo lại database mới với lớp đại học!');
+                    return;
+                }
+            } catch (e) {
+                console.error('Error checking old data:', e);
+            }
+        }
+        
         const loaded = Database.loadFromLocalStorage();
         if (!loaded || Database.students.length === 0) {
             Database.init();
