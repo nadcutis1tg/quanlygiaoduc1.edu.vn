@@ -86,7 +86,7 @@ const AIEngine = {
         return [
             { type: 'room', description: 'Phòng 301 bị trùng lịch' },
             { type: 'teacher', description: 'GV Nguyễn Văn A dạy 2 lớp cùng giờ' },
-            { type: 'student', description: 'Lớp 10A có 2 môn cùng tiết' }
+            { type: 'student', description: 'Lớp CNTT-K24A có 2 môn cùng tiết' }
         ];
     },
 
@@ -97,7 +97,7 @@ const AIEngine = {
             suggestions: [
                 'Chuyển lớp CS101 sang phòng 302',
                 'Đổi giờ dạy của GV Nguyễn Văn A',
-                'Điều chỉnh thời khóa biểu lớp 10A'
+                'Điều chỉnh thời khóa biểu lớp CNTT-K24A'
             ]
         };
     },
