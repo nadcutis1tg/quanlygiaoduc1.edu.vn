@@ -1114,3 +1114,535 @@
 .class-detail .detail-item a:hover {
     text-decoration: underline;
 }
+
+
+/* ===== SCHEDULE AI STYLES ===== */
+.schedule-page-ai {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-header {
+    background: white;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.schedule-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.schedule-subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.schedule-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.schedule-content {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.schedule-sidebar {
+    width: 300px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.sidebar-header h3 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1f2937;
+    margin: 0;
+}
+
+.ai-badge {
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 9999px;
+}
+
+.sidebar-filter {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.pending-courses {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 8px;
+}
+
+/* Course Cards */
+.course-card {
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid;
+}
+
+.course-card.blue {
+    background: #eff6ff;
+    border-left-color: #3b82f6;
+}
+
+.course-card.purple {
+    background: #f5f3ff;
+    border-left-color: #8b5cf6;
+}
+
+.course-card.orange {
+    background: #fff7ed;
+    border-left-color: #f97316;
+}
+
+.course-card.green {
+    background: #f0fdf4;
+    border-left-color: #22c55e;
+}
+
+.course-card.red {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+}
+
+.course-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.course-card.selected {
+    ring: 4px;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3);
+}
+
+.course-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.course-teacher {
+    font-size: 11px;
+    color: #6b7280;
+    margin: 0 0 12px 0;
+}
+
+.course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.course-periods {
+    font-size: 10px;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+}
+
+.course-class {
+    font-size: 10px;
+    font-weight: 700;
+    color: #4f46e5;
+    text-transform: uppercase;
+}
+
+/* Schedule Table Wrapper */
+.schedule-table-wrapper {
+    flex: 1;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-info {
+    padding: 16px 20px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.legend {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+}
+
+.legend-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.legend-box.blue {
+    background: #3b82f6;
+}
+
+.legend-box.purple {
+    background: #8b5cf6;
+}
+
+/* Schedule Table AI */
+.schedule-table-container {
+    flex: 1;
+    overflow: auto;
+}
+
+.schedule-table-ai {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.schedule-table-ai thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+}
+
+.schedule-table-ai th {
+    padding: 16px;
+    border-bottom: 2px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+}
+
+.schedule-table-ai th.time-column {
+    width: 80px;
+}
+
+.schedule-table-ai td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    height: 120px;
+    vertical-align: top;
+}
+
+.period-cell {
+    background: #f9fafb;
+    text-align: center;
+    font-weight: 700;
+    color: #9ca3af;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.schedule-cell {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.schedule-cell:hover {
+    background: #eef2ff;
+}
+
+.empty-cell {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d1d5db;
+    font-size: 12px;
+}
+
+/* Class Block */
+.class-block {
+    padding: 8px;
+    border-radius: 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+}
+
+.class-block.blue {
+    background: #3b82f6;
+}
+
+.class-block.purple {
+    background: #8b5cf6;
+}
+
+.class-block.orange {
+    background: #f97316;
+}
+
+.class-block.green {
+    background: #22c55e;
+}
+
+.class-block.red {
+    background: #ef4444;
+}
+
+.class-block.pink {
+    background: #ec4899;
+}
+
+.block-subject {
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    font-size: 11px;
+}
+
+.block-teacher,
+.block-room,
+.block-class {
+    margin: 2px 0;
+    opacity: 0.9;
+}
+
+/* AI Scan Modal */
+.ai-scan-modal .modal-content {
+    max-width: 700px;
+}
+
+.ai-modal-content {
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.ai-modal-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    padding: 24px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ai-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ai-icon {
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4f46e5;
+    font-size: 20px;
+}
+
+.ai-modal-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.ai-modal-header .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.ai-modal-header .close-btn:hover {
+    transform: rotate(90deg);
+}
+
+.ai-modal-body {
+    padding: 32px;
+}
+
+/* Scanning Effect */
+.scanning-effect {
+    padding: 40px 0;
+}
+
+.progress-bar-ai {
+    height: 12px;
+    background: #f3f4f6;
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill-ai {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    border-radius: 9999px;
+    animation: progress 2s ease-in-out forwards;
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+}
+
+@keyframes progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.scanning-text {
+    text-align: center;
+    margin-top: 24px;
+    color: #4f46e5;
+    font-weight: 600;
+    font-size: 14px;
+    animation: pulse 1.5s infinite;
+}
+
+/* AI Result */
+.ai-result {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.success-box {
+    display: flex;
+    gap: 16px;
+    background: #f0fdf4;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #bbf7d0;
+}
+
+.success-box i {
+    color: #22c55e;
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.success-title {
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 18px;
+    text-transform: uppercase;
+    margin: 0 0 4px 0;
+}
+
+.success-file {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 16px 0;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.success-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.success-list li {
+    font-size: 14px;
+    color: #374151;
+}
+
+.ai-question-box {
+    background: #eef2ff;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #c7d2fe;
+    display: flex;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-question-box i {
+    color: #4f46e5;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.ai-question-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #312e81;
+    margin: 0 0 8px 0;
+    font-style: italic;
+}
+
+.ai-question-text {
+    font-size: 14px;
+    color: #4338ca;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ai-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.btn-large {
+    flex: 1;
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 700;
+}
