@@ -83,14 +83,11 @@ const Students = {
                     <div class="search-box">
                         <i class="fas fa-search"></i>
                         <input type="text" id="student-search" placeholder="Tìm kiếm theo tên, mã SV..." 
-                               value="${this.searchQuery}" onkeyup="Students.handleSearch(this.value)">
+                               value="${this.searchQuery}" oninput="Students.handleSearchInput(this.value)">
                     </div>
                     <select id="class-filter" onchange="Students.filterByClass(this.value)">
                         <option value="all">Tất cả lớp</option>
                         ${Database.classes.map(c => `<option value="${c.name}" ${this.filterClass === c.name ? 'selected' : ''}>${c.name} - ${c.faculty}</option>`).join('')}
-                    </select>
-                        <option value="10A2" ${this.filterClass === '10A2' ? 'selected' : ''}>Lớp 10A2</option>
-                        <option value="10A3" ${this.filterClass === '10A3' ? 'selected' : ''}>Lớp 10A3</option>
                     </select>
                     <select id="status-filter" onchange="Students.filterByStatus(this.value)">
                         <option value="all">Tất cả trạng thái</option>
@@ -205,6 +202,42 @@ const Students = {
         `;
     },
 
+    renderTable() {
+        const students = this.getFilteredStudents();
+        const paginated = Utils.paginate(students, this.currentPage, this.itemsPerPage);
+        
+        const tableContainer = document.querySelector('.table-container');
+        if (!tableContainer) {
+            this.render();
+            return;
+        }
+
+        tableContainer.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ tên</th>
+                        <th>Lớp/Khoa</th>
+                        <th>GPA</th>
+                        <th>Tham gia</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${paginated.data.map(student => this.renderStudentRow(student)).join('')}
+                </tbody>
+            </table>
+        `;
+
+        // Update pagination
+        const paginationContainer = document.querySelector('.pagination');
+        if (paginationContainer) {
+            paginationContainer.outerHTML = this.renderPagination(paginated);
+        }
+    },
+
     getFilteredStudents() {
         let students = Database.getAllStudents();
 
@@ -226,10 +259,20 @@ const Students = {
         return students;
     },
 
+    handleSearchInput(query) {
+        this.searchQuery = query;
+        // Debounce: chỉ render sau khi người dùng ngừng gõ 300ms
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.currentPage = 1;
+            this.renderTable();
+        }, 300);
+    },
+
     handleSearch(query) {
         this.searchQuery = query;
         this.currentPage = 1;
-        this.render();
+        this.renderTable();
     },
 
     filterByClass(className) {
