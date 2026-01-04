@@ -1,308 +1,494 @@
-// Schedule Management Module - AI-Powered Timetable
+// Schedule Management Module
 const Schedule = {
-    currentWeek: 1,
-    viewMode: 'class', // 'class', 'teacher', 'room'
+    selectedClass: 'all',
+    selectedWeek: 0,
+    selectedCourse: null,
+    pendingCourses: [],
 
     render() {
         const contentArea = document.getElementById('content-area');
+        const classes = Database.classes;
+        
+        // Tạo danh sách môn học chờ xếp
+        this.generatePendingCourses();
+
         contentArea.innerHTML = `
-            <div class="schedule-page">
-                <div class="page-header">
-                    <h1>📅 Thời khóa biểu Thông minh</h1>
-                    <div class="header-actions">
-                        <button class="btn btn-secondary" onclick="Schedule.uploadFile()">
-                            <i class="fas fa-upload"></i> Upload Excel
+            <style>
+                .schedule-page-ai { height: 100%; display: flex; flex-direction: column; }
+                .schedule-header { background: white; padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+                .schedule-header h1 { font-size: 24px; font-weight: 700; margin: 0; }
+                .schedule-subtitle { font-size: 12px; color: #6b7280; margin-top: 4px; }
+                .schedule-actions { display: flex; gap: 12px; }
+                .schedule-content { flex: 1; display: flex; gap: 24px; padding: 24px; overflow: hidden; }
+                .schedule-sidebar { width: 300px; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; }
+                .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f3f4f6; }
+                .sidebar-header h3 { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; }
+                .ai-badge { background: #eef2ff; color: #4f46e5; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 9999px; }
+                .sidebar-filter { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 16px; }
+                .pending-courses { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+                .course-card { padding: 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border-left: 4px solid; }
+                .course-card.blue { background: #eff6ff; border-left-color: #3b82f6; }
+                .course-card.purple { background: #f5f3ff; border-left-color: #8b5cf6; }
+                .course-card.orange { background: #fff7ed; border-left-color: #f97316; }
+                .course-card.green { background: #f0fdf4; border-left-color: #22c55e; }
+                .course-card.red { background: #fef2f2; border-left-color: #ef4444; }
+                .course-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+                .course-card.selected { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3); }
+                .course-name { font-size: 14px; font-weight: 700; margin: 0 0 8px 0; }
+                .course-teacher { font-size: 11px; color: #6b7280; margin: 0 0 12px 0; }
+                .course-meta { display: flex; justify-content: space-between; }
+                .course-periods { font-size: 10px; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e5e7eb; }
+                .course-class { font-size: 10px; font-weight: 700; color: #4f46e5; text-transform: uppercase; }
+                .schedule-table-wrapper { flex: 1; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; }
+                .table-info { padding: 16px 20px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 12px; }
+                .legend { display: flex; gap: 16px; font-size: 11px; }
+                .legend-box { width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+                .legend-box.blue { background: #3b82f6; }
+                .legend-box.purple { background: #8b5cf6; }
+                .schedule-table-container { flex: 1; overflow: auto; }
+                .schedule-table-ai { width: 100%; border-collapse: collapse; }
+                .schedule-table-ai thead { position: sticky; top: 0; z-index: 10; background: white; }
+                .schedule-table-ai th { padding: 16px; border-bottom: 2px solid #e5e7eb; border-right: 1px solid #e5e7eb; text-align: center; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #6b7280; }
+                .schedule-table-ai th.time-column { width: 80px; }
+                .schedule-table-ai td { padding: 8px; border-bottom: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; height: 120px; vertical-align: top; }
+                .period-cell { background: #f9fafb; text-align: center; font-weight: 700; color: #9ca3af; font-size: 14px; }
+                .schedule-cell { cursor: pointer; transition: background 0.2s; }
+                .schedule-cell:hover { background: #eef2ff; }
+                .empty-cell { height: 100%; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 12px; }
+                .class-block { padding: 8px; border-radius: 8px; height: 100%; display: flex; flex-direction: column; justify-content: center; color: white; font-size: 10px; }
+                .class-block.blue { background: #3b82f6; }
+                .class-block.purple { background: #8b5cf6; }
+                .class-block.orange { background: #f97316; }
+                .class-block.green { background: #22c55e; }
+                .class-block.red { background: #ef4444; }
+                .class-block.pink { background: #ec4899; }
+                .block-subject { font-weight: 700; margin: 0 0 4px 0; font-size: 11px; }
+                .block-teacher, .block-room, .block-class { margin: 2px 0; opacity: 0.9; }
+            </style>
+            <div class="schedule-page-ai">
+                <!-- Header -->
+                <div class="schedule-header">
+                    <div>
+                        <h1>📅 Quản lý Thời khóa biểu AI</h1>
+                        <p class="schedule-subtitle">Học kỳ 1 (2024 - 2025) • Cơ sở chính</p>
+                    </div>
+                    <div class="schedule-actions">
+                        <button class="btn btn-success" onclick="Schedule.openAIScan()">
+                            <i class="fas fa-file-import"></i> NHẬP EXCEL (AI SCAN)
+                        </button>
+                        <button class="btn btn-primary" onclick="Schedule.autoSchedule()">
+                            <i class="fas fa-magic"></i> TỰ ĐỘNG XẾP LỊCH
                         </button>
                         <button class="btn btn-secondary" onclick="Schedule.exportSchedule()">
-                            <i class="fas fa-download"></i> Xuất TKB
-                        </button>
-                        <button class="btn btn-primary" onclick="Schedule.autoGenerate()">
-                            <i class="fas fa-magic"></i> AI Xếp lịch tự động
+                            <i class="fas fa-download"></i> XUẤT FILE
                         </button>
                     </div>
                 </div>
 
-                <!-- AI Optimization Banner -->
-                <div class="ai-insights-banner">
-                    <div class="insight-icon">🤖</div>
-                    <div class="insight-content">
-                        <h3>AI phát hiện 15 xung đột có thể tối ưu</h3>
-                        <p>Giảm xung đột lịch học, tối ưu phòng học và giảm thời gian di chuyển giảng viên</p>
-                        <button class="btn-link" onclick="Schedule.optimizeNow()">
-                            Tối ưu ngay →
+                <!-- Main Content -->
+                <div class="schedule-content">
+                    <!-- Sidebar: Môn học chờ xếp -->
+                    <div class="schedule-sidebar">
+                        <div class="sidebar-header">
+                            <h3>Môn học chờ xếp</h3>
+                            <span class="ai-badge">AI ĐỀ XUẤT</span>
+                        </div>
+                        
+                        <!-- Filter -->
+                        <select class="sidebar-filter" id="class-filter" onchange="Schedule.filterByClass(this.value)">
+                            <option value="all">Tất cả lớp</option>
+                            ${classes.map(c => `
+                                <option value="${c.name}" ${this.selectedClass === c.name ? 'selected' : ''}>
+                                    ${c.name}
+                                </option>
+                            `).join('')}
+                        </select>
+
+                        <div class="pending-courses">
+                            ${this.renderPendingCourses()}
+                        </div>
+                    </div>
+
+                    <!-- Main Table -->
+                    <div class="schedule-table-wrapper">
+                        <div class="table-info">
+                            <span><i class="fas fa-info-circle"></i> Mẹo: Chọn môn bên trái rồi nhấn vào ô trống để xếp</span>
+                            <div class="legend">
+                                <span><span class="legend-box blue"></span> Lý thuyết</span>
+                                <span><span class="legend-box purple"></span> Thực hành</span>
+                            </div>
+                        </div>
+                        ${this.renderScheduleTable()}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    generatePendingCourses() {
+        const teachers = Database.getAllTeachers();
+        const classes = Database.classes;
+        
+        this.pendingCourses = [];
+        
+        // Tạo danh sách môn học mẫu chưa xếp lịch
+        const subjects = [
+            { name: 'Toán Rời Rạc', periods: 3, color: 'blue', type: 'theory' },
+            { name: 'Lập trình C++', periods: 4, color: 'purple', type: 'practice' },
+            { name: 'AI Cơ bản', periods: 2, color: 'orange', type: 'theory' },
+            { name: 'Cơ sở dữ liệu', periods: 3, color: 'green', type: 'theory' },
+            { name: 'Mạng máy tính', periods: 3, color: 'red', type: 'theory' }
+        ];
+
+        subjects.forEach((subject, index) => {
+            const teacher = teachers[index % teachers.length];
+            const classInfo = classes[index % classes.length];
+            
+            this.pendingCourses.push({
+                id: `pending-${index}`,
+                subject: subject.name,
+                teacher: teacher.name,
+                teacherId: teacher.id,
+                className: classInfo.name,
+                periods: subject.periods,
+                color: subject.color,
+                type: subject.type
+            });
+        });
+    },
+
+    renderPendingCourses() {
+        let courses = this.pendingCourses;
+        
+        if (this.selectedClass !== 'all') {
+            courses = courses.filter(c => c.className === this.selectedClass);
+        }
+
+        return courses.map(course => `
+            <div class="course-card ${course.color}" 
+                 data-course-id="${course.id}"
+                 onclick="Schedule.selectCourse('${course.id}')">
+                <p class="course-name">${course.subject}</p>
+                <p class="course-teacher"><i class="fas fa-user-tie"></i> GV: ${course.teacher}</p>
+                <div class="course-meta">
+                    <span class="course-periods">${course.periods} Tiết/Tuần</span>
+                    <span class="course-class">Lớp: ${course.className}</span>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    selectCourse(courseId) {
+        // Bỏ chọn tất cả
+        document.querySelectorAll('.course-card').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // Chọn môn học
+        const courseEl = document.querySelector(`[data-course-id="${courseId}"]`);
+        if (courseEl) {
+            courseEl.classList.add('selected');
+            this.selectedCourse = this.pendingCourses.find(c => c.id === courseId);
+        }
+    },
+
+    renderScheduleTable() {
+        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+        const periods = 6; // 6 ca học
+
+        let schedules = Database.schedules;
+        if (this.selectedClass !== 'all') {
+            schedules = schedules.filter(s => s.className === this.selectedClass);
+        }
+
+        return `
+            <div class="schedule-table-container">
+                <table class="schedule-table-ai">
+                    <thead>
+                        <tr>
+                            <th class="time-column">CA</th>
+                            ${days.map(day => `<th>${day}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Array.from({length: periods}, (_, periodIndex) => `
+                            <tr>
+                                <td class="period-cell">Ca ${periodIndex + 1}</td>
+                                ${days.map((day, dayIndex) => {
+                                    const schedule = schedules.find(s => 
+                                        s.dayIndex === dayIndex && s.periodIndex === periodIndex
+                                    );
+                                    return `
+                                        <td class="schedule-cell ${schedule ? 'has-class' : ''}" 
+                                            data-day="${dayIndex}" 
+                                            data-period="${periodIndex}"
+                                            onclick="Schedule.placeCourse(${dayIndex}, ${periodIndex})">
+                                            ${schedule ? `
+                                                <div class="class-block ${this.getColorClass(schedule.subject)}">
+                                                    <p class="block-subject">${schedule.subject}</p>
+                                                    <p class="block-teacher">${schedule.teacherName}</p>
+                                                    <p class="block-room">${schedule.room}</p>
+                                                    ${this.selectedClass === 'all' ? `<p class="block-class">${schedule.className}</p>` : ''}
+                                                </div>
+                                            ` : '<div class="empty-cell"></div>'}
+                                        </td>
+                                    `;
+                                }).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    },
+
+    getColorClass(subject) {
+        const colors = ['blue', 'purple', 'orange', 'green', 'red', 'pink'];
+        const hash = subject.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        return colors[hash % colors.length];
+    },
+
+    placeCourse(dayIndex, periodIndex) {
+        if (!this.selectedCourse) {
+            Utils.showToast('Vui lòng chọn môn học từ danh sách bên trái', 'warning');
+            return;
+        }
+
+        // Kiểm tra xem ô đã có lịch chưa
+        const existingSchedule = Database.schedules.find(s => 
+            s.dayIndex === dayIndex && 
+            s.periodIndex === periodIndex &&
+            (this.selectedClass === 'all' || s.className === this.selectedClass)
+        );
+
+        if (existingSchedule) {
+            if (confirm('Ô này đã có lịch. Bạn có muốn gỡ môn học này không?')) {
+                Database.deleteSchedule(existingSchedule.id);
+                Utils.showToast('Đã gỡ lịch học', 'success');
+                this.render();
+            }
+            return;
+        }
+
+        // Thêm lịch học mới
+        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+        const periods = ['Tiết 1-2', 'Tiết 3-4', 'Tiết 5-6', 'Tiết 7-8', 'Tiết 9-10', 'Tiết 11-12'];
+        const classInfo = Database.classes.find(c => c.name === this.selectedCourse.className);
+
+        const scheduleData = {
+            classId: classInfo.id,
+            className: this.selectedCourse.className,
+            faculty: classInfo.faculty,
+            subject: this.selectedCourse.subject,
+            teacherId: this.selectedCourse.teacherId,
+            teacherName: this.selectedCourse.teacher,
+            room: `P${Math.floor(Math.random() * 500) + 100}`,
+            day: days[dayIndex],
+            dayIndex: dayIndex,
+            period: periods[periodIndex],
+            periodIndex: periodIndex,
+            startTime: `${7 + periodIndex * 2}:00`,
+            endTime: `${9 + periodIndex * 2}:00`
+        };
+
+        Database.addSchedule(scheduleData);
+        Utils.showToast(`Đã xếp ${this.selectedCourse.subject} vào ${days[dayIndex]} Ca ${periodIndex + 1}`, 'success');
+        
+        // Bỏ chọn môn học
+        this.selectedCourse = null;
+        this.render();
+    },
+
+    filterByClass(className) {
+        this.selectedClass = className;
+        this.render();
+    },
+
+    openAIScan() {
+        const modal = `
+            <div class="modal-overlay ai-scan-modal" onclick="if(event.target === this) Schedule.closeModal()">
+                <div class="modal-content ai-modal-content">
+                    <div class="ai-modal-header">
+                        <div class="ai-header-left">
+                            <div class="ai-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h3>AI ĐANG PHÂN TÍCH FILE...</h3>
+                        </div>
+                        <button class="close-btn" onclick="Schedule.closeModal()">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
-                </div>
-
-                <!-- View Mode Selector -->
-                <div class="view-mode-selector">
-                    <button class="mode-btn ${this.viewMode === 'class' ? 'active' : ''}" 
-                            onclick="Schedule.changeViewMode('class')">
-                        <i class="fas fa-users"></i> Theo lớp
-                    </button>
-                    <button class="mode-btn ${this.viewMode === 'teacher' ? 'active' : ''}" 
-                            onclick="Schedule.changeViewMode('teacher')">
-                        <i class="fas fa-chalkboard-teacher"></i> Theo giảng viên
-                    </button>
-                    <button class="mode-btn ${this.viewMode === 'room' ? 'active' : ''}" 
-                            onclick="Schedule.changeViewMode('room')">
-                        <i class="fas fa-door-open"></i> Theo phòng học
-                    </button>
-                </div>
-
-                <!-- Filters -->
-                <div class="filters-section">
-                    <select id="schedule-filter" onchange="Schedule.filterSchedule(this.value)">
-                        ${this.getFilterOptions()}
-                    </select>
-                    <select onchange="Schedule.changeWeek(this.value)">
-                        <option value="1">Tuần 1</option>
-                        <option value="2">Tuần 2</option>
-                        <option value="3">Tuần 3</option>
-                        <option value="4">Tuần 4</option>
-                    </select>
-                    <button class="btn btn-secondary" onclick="Schedule.manualEdit()">
-                        <i class="fas fa-edit"></i> Xếp tay
-                    </button>
-                </div>
-
-                <!-- Timetable -->
-                <div class="timetable-container">
-                    ${this.renderTimetable()}
-                </div>
-
-                <!-- Conflicts & Warnings -->
-                <div class="conflicts-section">
-                    <h3>⚠️ Xung đột & Cảnh báo</h3>
-                    <div class="conflicts-list">
-                        ${this.renderConflicts()}
-                    </div>
-                </div>
-
-                <!-- Statistics -->
-                <div class="schedule-stats">
-                    <div class="stat-card">
-                        <h4>📊 Thống kê</h4>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <span class="stat-label">Tổng tiết học:</span>
-                                <span class="stat-value">450</span>
+                    <div class="ai-modal-body">
+                        <!-- Scanning Effect -->
+                        <div id="scanningEffect" class="scanning-effect">
+                            <div class="progress-bar-ai">
+                                <div class="progress-fill-ai"></div>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Phòng học sử dụng:</span>
-                                <span class="stat-value">45/50</span>
+                            <p class="scanning-text">Đang nhận diện Header: "Mã GV", "Tên môn học", "Sĩ số phòng"...</p>
+                        </div>
+
+                        <!-- AI Result -->
+                        <div id="aiResult" class="ai-result hidden">
+                            <div class="success-box">
+                                <i class="fas fa-check-circle"></i>
+                                <div>
+                                    <p class="success-title">PHÂN TÍCH THÀNH CÔNG!</p>
+                                    <p class="success-file">File: "Danh_sach_HK1_2024.xlsx"</p>
+                                    <ul class="success-list">
+                                        <li>👨‍🏫 <strong>35 Giảng viên</strong>: Tự động khớp từ cột "Teacher_ID"</li>
+                                        <li>📚 <strong>24 Môn học</strong>: Tự động khớp từ cột "Course_Code"</li>
+                                        <li>🏫 <strong>18 Phòng học</strong>: Tự động khớp từ cột "Room_Capacity"</li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Giảng viên tham gia:</span>
-                                <span class="stat-value">120</span>
+
+                            <div class="ai-question-box">
+                                <i class="fas fa-comment-dots"></i>
+                                <div>
+                                    <p class="ai-question-title">TRỢ LÝ AI HỎI:</p>
+                                    <p class="ai-question-text">"Tôi phát hiện có <strong>2 Giảng viên</strong> bị trùng lịch nếu xếp theo mặc định. Bạn có muốn tôi ưu tiên xếp họ dạy vào buổi sáng để tối ưu không?"</p>
+                                </div>
                             </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Xung đột:</span>
-                                <span class="stat-value warning">15</span>
+
+                            <div class="ai-actions">
+                                <button class="btn btn-primary btn-large" onclick="Schedule.proceedWithAI()">
+                                    TIẾN HÀNH XẾP LỊCH
+                                </button>
+                                <button class="btn btn-secondary btn-large" onclick="Schedule.closeModal()">
+                                    CHỈNH SỬA THỦ CÔNG
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         `;
-    },
-
-    getFilterOptions() {
-        const options = {
-            'class': `
-                <option value="">Chọn lớp</option>
-                <option value="10A">Lớp 10A</option>
-                <option value="10B">Lớp 10B</option>
-                <option value="11A">Lớp 11A</option>
-            `,
-            'teacher': `
-                <option value="">Chọn giảng viên</option>
-                <option value="GV001">GS. Nguyễn Văn A</option>
-                <option value="GV002">PGS. Trần Thị B</option>
-                <option value="GV003">TS. Lê Văn C</option>
-            `,
-            'room': `
-                <option value="">Chọn phòng học</option>
-                <option value="P301">Phòng 301</option>
-                <option value="P302">Phòng 302</option>
-                <option value="LAB1">Lab 1</option>
-            `
-        };
-        return options[this.viewMode];
-    },
-
-    renderTimetable() {
-        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-        const periods = ['1-2', '3-4', '5-6', '7-8', '9-10'];
-
-        return `
-            <table class="timetable">
-                <thead>
-                    <tr>
-                        <th class="period-header">Tiết</th>
-                        ${days.map(day => `<th>${day}</th>`).join('')}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${periods.map((period, pIndex) => `
-                        <tr>
-                            <td class="period-cell">${period}</td>
-                            ${days.map((day, dIndex) => {
-                                const lesson = this.getLesson(dIndex, pIndex);
-                                return `
-                                    <td class="lesson-cell ${lesson.conflict ? 'conflict' : ''}" 
-                                        onclick="Schedule.editLesson(${dIndex}, ${pIndex})">
-                                        ${lesson.content}
-                                    </td>
-                                `;
-                            }).join('')}
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    },
-
-    getLesson(dayIndex, periodIndex) {
-        const schedule = Database.get('schedule');
-        const lesson = schedule.find(l => l.day === dayIndex && l.period === periodIndex);
         
-        if (lesson) {
-            // Check for conflicts
-            const conflicts = schedule.filter(l => 
-                l.day === dayIndex && 
-                l.period === periodIndex && 
-                (l.room === lesson.room || l.teacherId === lesson.teacherId)
-            );
+        document.body.insertAdjacentHTML('beforeend', modal);
+        
+        // Simulate AI scanning
+        setTimeout(() => {
+            document.getElementById('scanningEffect').classList.add('hidden');
+            document.getElementById('aiResult').classList.remove('hidden');
+        }, 2200);
+    },
+
+    proceedWithAI() {
+        this.closeModal();
+        Utils.showToast('AI đang tự động xếp lịch...', 'info');
+        setTimeout(() => {
+            this.autoSchedule();
+        }, 500);
+    },
+
+    autoSchedule() {
+        Utils.showLoading('AI đang tự động xếp lịch tối ưu...');
+        
+        setTimeout(() => {
+            // Xóa tất cả lịch cũ
+            Database.schedules = [];
             
-            return {
-                content: `
-                    <div class="lesson-info">
-                        <div class="lesson-subject">${lesson.courseName}</div>
-                        <div class="lesson-teacher">${lesson.teacherName}</div>
-                        <div class="lesson-room">${lesson.room}</div>
-                        <div class="lesson-class">${lesson.class}</div>
-                    </div>
-                `,
-                conflict: conflicts.length > 1
-            };
+            // Tự động xếp lịch cho các môn học
+            const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+            const periods = ['Tiết 1-2', 'Tiết 3-4', 'Tiết 5-6', 'Tiết 7-8', 'Tiết 9-10', 'Tiết 11-12'];
+            
+            this.pendingCourses.forEach((course, index) => {
+                const dayIndex = index % 5;
+                const periodIndex = Math.floor(index / 5) % 6;
+                const classInfo = Database.classes.find(c => c.name === course.className);
+                
+                if (classInfo) {
+                    Database.addSchedule({
+                        classId: classInfo.id,
+                        className: course.className,
+                        faculty: classInfo.faculty,
+                        subject: course.subject,
+                        teacherId: course.teacherId,
+                        teacherName: course.teacher,
+                        room: `P${Math.floor(Math.random() * 500) + 100}`,
+                        day: days[dayIndex],
+                        dayIndex: dayIndex,
+                        period: periods[periodIndex],
+                        periodIndex: periodIndex,
+                        startTime: `${7 + periodIndex * 2}:00`,
+                        endTime: `${9 + periodIndex * 2}:00`
+                    });
+                }
+            });
+            
+            Utils.hideLoading();
+            Utils.showToast('AI đã xếp lịch thành công cho tất cả môn học!', 'success');
+            this.render();
+        }, 2000);
+    },
+
+    previousWeek() {
+        this.selectedWeek--;
+        Utils.showToast('Xem tuần trước', 'info');
+    },
+
+    nextWeek() {
+        this.selectedWeek++;
+        Utils.showToast('Xem tuần sau', 'info');
+    },
+
+    viewScheduleDetail(id) {
+        if (!id) {
+            Utils.showToast('Tiết học trống', 'info');
+            return;
         }
 
-        return {
-            content: '<div class="empty-lesson">+</div>',
-            conflict: false
-        };
-    },
+        const schedule = Database.schedules.find(s => s.id === id);
+        if (!schedule) return;
 
-    renderConflicts() {
-        const conflicts = [
-            {
-                type: 'room',
-                severity: 'high',
-                message: 'Phòng 301 bị trùng lịch: Lớp 10A và 10B cùng tiết 3-4 thứ 3',
-                suggestion: 'Chuyển lớp 10B sang phòng 302'
-            },
-            {
-                type: 'teacher',
-                severity: 'high',
-                message: 'GV Nguyễn Văn A dạy 2 lớp cùng giờ: 10A và 11B',
-                suggestion: 'Đổi giờ dạy lớp 11B sang tiết 5-6'
-            },
-            {
-                type: 'student',
-                severity: 'medium',
-                message: 'Lớp 10A có 2 môn học cùng tiết',
-                suggestion: 'Điều chỉnh thời khóa biểu lớp 10A'
-            }
-        ];
-
-        return conflicts.map(conflict => `
-            <div class="conflict-item ${conflict.severity}">
-                <div class="conflict-icon">
-                    ${conflict.type === 'room' ? '🚪' : conflict.type === 'teacher' ? '👨‍🏫' : '👨‍🎓'}
-                </div>
-                <div class="conflict-content">
-                    <div class="conflict-message">${conflict.message}</div>
-                    <div class="conflict-suggestion">
-                        💡 Đề xuất: ${conflict.suggestion}
-                    </div>
-                </div>
-                <button class="btn-icon" onclick="Schedule.resolveConflict('${conflict.type}')">
-                    <i class="fas fa-check"></i>
-                </button>
-            </div>
-        `).join('');
-    },
-
-    changeViewMode(mode) {
-        this.viewMode = mode;
-        this.render();
-    },
-
-    filterSchedule(value) {
-        console.log('Filter schedule:', value);
-    },
-
-    changeWeek(week) {
-        this.currentWeek = week;
-        this.render();
-    },
-
-    editLesson(dayIndex, periodIndex) {
-        const courses = Database.get('courses');
-        const teachers = Database.get('teachers');
-        const classes = ['CNTT-K18', 'CNTT-K19', 'KT-K18', 'KT-K19', 'NN-K18'];
-        
         const modal = `
-            <div class="modal-overlay" onclick="Schedule.closeModal()">
-                <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-overlay" onclick="if(event.target === this) Schedule.closeModal()">
+                <div class="modal-content">
                     <div class="modal-header">
-                        <h2>✏️ Chỉnh sửa tiết học</h2>
-                        <button onclick="Schedule.closeModal()">✕</button>
+                        <h3><i class="fas fa-calendar"></i> Chi Tiết Lịch Học</h3>
+                        <button class="close-btn" onclick="Schedule.closeModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="modal-body">
-                        <form onsubmit="Schedule.saveLesson(event, ${dayIndex}, ${periodIndex})">
-                            <div class="form-group">
-                                <label>Môn học *</label>
-                                <select name="course" required>
-                                    <option value="">Chọn môn học</option>
-                                    ${courses.map(c => `<option value="${c.id}">${c.name} (${c.credits} TC)</option>`).join('')}
-                                </select>
+                    <div class="schedule-detail">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Môn học:</label>
+                                <span class="highlight">${schedule.subject}</span>
                             </div>
-                            <div class="form-group">
-                                <label>Giảng viên *</label>
-                                <select name="teacher" required>
-                                    <option value="">Chọn giảng viên</option>
-                                    ${teachers.map(t => `<option value="${t.id}">${t.name} - ${t.department}</option>`).join('')}
-                                </select>
+                            <div class="detail-item">
+                                <label>Lớp:</label>
+                                <span>${schedule.className}</span>
                             </div>
-                            <div class="form-group">
-                                <label>Phòng học *</label>
-                                <select name="room" required>
-                                    <option value="">Chọn phòng</option>
-                                    <option value="P301">P301</option>
-                                    <option value="P302">P302</option>
-                                    <option value="P303">P303</option>
-                                    <option value="LAB1">LAB1</option>
-                                    <option value="LAB2">LAB2</option>
-                                </select>
+                            <div class="detail-item">
+                                <label>Giảng viên:</label>
+                                <span>${schedule.teacherName}</span>
                             </div>
-                            <div class="form-group">
-                                <label>Lớp *</label>
-                                <select name="class" required>
-                                    <option value="">Chọn lớp</option>
-                                    ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
-                                </select>
+                            <div class="detail-item">
+                                <label>Phòng học:</label>
+                                <span>${schedule.room}</span>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" onclick="Schedule.closeModal()">
-                                    Hủy
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Lưu
-                                </button>
+                            <div class="detail-item">
+                                <label>Thời gian:</label>
+                                <span>${schedule.day}, ${schedule.period}</span>
                             </div>
-                        </form>
+                            <div class="detail-item">
+                                <label>Giờ học:</label>
+                                <span>${schedule.startTime} - ${schedule.endTime}</span>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="Schedule.closeModal()">
+                                <i class="fas fa-times"></i> Đóng
+                            </button>
+                            <button class="btn btn-primary" onclick="Schedule.closeModal(); Schedule.editSchedule('${schedule.id}')">
+                                <i class="fas fa-edit"></i> Chỉnh sửa
+                            </button>
+                            <button class="btn btn-danger" onclick="Schedule.deleteScheduleConfirm('${schedule.id}')">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -310,96 +496,220 @@ const Schedule = {
         document.body.insertAdjacentHTML('beforeend', modal);
     },
 
-    closeModal() {
-        document.querySelector('.modal-overlay')?.remove();
+    addSchedule() {
+        const classes = Database.classes;
+        const teachers = Database.getAllTeachers();
+        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+        const periods = ['Tiết 1', 'Tiết 2', 'Tiết 3', 'Tiết 4', 'Tiết 5'];
+
+        const modal = `
+            <div class="modal-overlay" onclick="if(event.target === this) Schedule.closeModal()">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-plus"></i> Thêm Lịch Học</h3>
+                        <button class="close-btn" onclick="Schedule.closeModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="Schedule.saveNewSchedule(event)" class="student-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Lớp <span class="required">*</span></label>
+                                <select name="className" required>
+                                    ${classes.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Môn học <span class="required">*</span></label>
+                                <input type="text" name="subject" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Giảng viên <span class="required">*</span></label>
+                                <select name="teacherId" required>
+                                    ${teachers.map(t => `<option value="${t.id}">${t.name} - ${t.subject}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Phòng học <span class="required">*</span></label>
+                                <input type="text" name="room" placeholder="P101" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Thứ <span class="required">*</span></label>
+                                <select name="day" required>
+                                    ${days.map((d, i) => `<option value="${i}">${d}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tiết <span class="required">*</span></label>
+                                <select name="period" required>
+                                    ${periods.map((p, i) => `<option value="${i}">${p}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="Schedule.closeModal()">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
     },
 
-    saveLesson(event, dayIndex, periodIndex) {
+    saveNewSchedule(event) {
         event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form);
-        
-        const courseId = formData.get('course');
-        const teacherId = formData.get('teacher');
-        const room = formData.get('room');
-        const className = formData.get('class');
-        
-        const course = Database.findOne('courses', c => c.id === courseId);
-        const teacher = Database.findOne('teachers', t => t.id === teacherId);
-        
-        const lesson = {
-            id: `SCH${dayIndex}${periodIndex}`,
-            day: dayIndex,
-            period: periodIndex,
-            courseId: course.id,
-            courseName: course.name,
+        const formData = new FormData(event.target);
+        const teacher = Database.getTeacher(formData.get('teacherId'));
+        const className = formData.get('className');
+        const classInfo = Database.classes.find(c => c.name === className);
+        const dayIndex = parseInt(formData.get('day'));
+        const periodIndex = parseInt(formData.get('period'));
+        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+        const periods = ['Tiết 1', 'Tiết 2', 'Tiết 3', 'Tiết 4', 'Tiết 5'];
+
+        const scheduleData = {
+            classId: classInfo.id,
+            className: className,
+            subject: formData.get('subject'),
             teacherId: teacher.id,
             teacherName: teacher.name,
-            room: room,
-            class: className
+            room: formData.get('room'),
+            day: days[dayIndex],
+            dayIndex: dayIndex,
+            period: periods[periodIndex],
+            periodIndex: periodIndex,
+            startTime: `${7 + periodIndex}:00`,
+            endTime: `${8 + periodIndex}:00`
         };
-        
-        // Remove existing lesson at this slot
-        const schedule = Database.get('schedule');
-        const filtered = schedule.filter(l => !(l.day === dayIndex && l.period === periodIndex));
-        filtered.push(lesson);
-        Database.save('schedule', filtered);
-        
+
+        Database.addSchedule(scheduleData);
         this.closeModal();
+        Utils.showToast('Đã thêm lịch học', 'success');
         this.render();
-        alert('✅ Đã lưu thay đổi!');
     },
 
-    autoGenerate() {
-        if (confirm('AI sẽ tự động xếp thời khóa biểu dựa trên các ràng buộc. Tiếp tục?')) {
-            // Show loading
-            const loading = `
-                <div class="loading-overlay">
-                    <div class="loading-content">
-                        <div class="loader"></div>
-                        <p>🤖 AI đang xếp thời khóa biểu...</p>
-                        <p class="loading-detail">Đang phân tích ràng buộc và tối ưu hóa...</p>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', loading);
+    editSchedule(id) {
+        const schedule = Database.schedules.find(s => s.id === id);
+        if (!schedule) return;
 
-            // Simulate AI processing
-            setTimeout(() => {
-                document.querySelector('.loading-overlay')?.remove();
-                alert('✅ Đã xếp thời khóa biểu thành công!\n\n📊 Kết quả:\n- Giảm 15 xung đột\n- Tối ưu phòng học 20%\n- Giảm di chuyển GV 30%');
-                this.render();
-            }, 3000);
+        const classes = Database.classes;
+        const teachers = Database.getAllTeachers();
+        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+        const periods = ['Tiết 1', 'Tiết 2', 'Tiết 3', 'Tiết 4', 'Tiết 5'];
+
+        const modal = `
+            <div class="modal-overlay" onclick="if(event.target === this) Schedule.closeModal()">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-edit"></i> Chỉnh Sửa Lịch Học</h3>
+                        <button class="close-btn" onclick="Schedule.closeModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form onsubmit="Schedule.saveEditSchedule(event, '${id}')" class="student-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Lớp <span class="required">*</span></label>
+                                <select name="className" required>
+                                    ${classes.map(c => `<option value="${c.name}" ${c.name === schedule.className ? 'selected' : ''}>${c.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Môn học <span class="required">*</span></label>
+                                <input type="text" name="subject" value="${schedule.subject}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Giảng viên <span class="required">*</span></label>
+                                <select name="teacherId" required>
+                                    ${teachers.map(t => `<option value="${t.id}" ${t.id === schedule.teacherId ? 'selected' : ''}>${t.name} - ${t.subject}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Phòng học <span class="required">*</span></label>
+                                <input type="text" name="room" value="${schedule.room}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Thứ <span class="required">*</span></label>
+                                <select name="day" required>
+                                    ${days.map((d, i) => `<option value="${i}" ${i === schedule.dayIndex ? 'selected' : ''}>${d}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tiết <span class="required">*</span></label>
+                                <select name="period" required>
+                                    ${periods.map((p, i) => `<option value="${i}" ${i === schedule.periodIndex ? 'selected' : ''}>${p}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="Schedule.closeModal()">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modal);
+    },
+
+    saveEditSchedule(event, id) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const teacher = Database.getTeacher(formData.get('teacherId'));
+        const className = formData.get('className');
+        const classInfo = Database.classes.find(c => c.name === className);
+        const dayIndex = parseInt(formData.get('day'));
+        const periodIndex = parseInt(formData.get('period'));
+        const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+        const periods = ['Tiết 1', 'Tiết 2', 'Tiết 3', 'Tiết 4', 'Tiết 5'];
+
+        const scheduleData = {
+            classId: classInfo.id,
+            className: className,
+            subject: formData.get('subject'),
+            teacherId: teacher.id,
+            teacherName: teacher.name,
+            room: formData.get('room'),
+            day: days[dayIndex],
+            dayIndex: dayIndex,
+            period: periods[periodIndex],
+            periodIndex: periodIndex,
+            startTime: `${7 + periodIndex}:00`,
+            endTime: `${8 + periodIndex}:00`
+        };
+
+        Database.updateSchedule(id, scheduleData);
+        this.closeModal();
+        Utils.showToast('Đã cập nhật lịch học', 'success');
+        this.render();
+    },
+
+    deleteScheduleConfirm(id) {
+        if (confirm('Bạn có chắc muốn xóa lịch học này?')) {
+            Database.deleteSchedule(id);
+            this.closeModal();
+            Utils.showToast('Đã xóa lịch học', 'success');
+            this.render();
         }
     },
 
-    optimizeNow() {
-        alert('Đang tối ưu hóa thời khóa biểu...');
-    },
-
-    uploadFile() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.xlsx,.xls,.csv';
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const analysis = await AIEngine.analyzeUploadedFile(file);
-                alert(`File đã phân tích:\n- ${analysis.detectedSheets.length} sheets\n- Độ tin cậy: ${analysis.confidence * 100}%`);
-            }
-        };
-        input.click();
-    },
-
     exportSchedule() {
-        alert('Xuất thời khóa biểu ra Excel');
+        Utils.showToast('Đang xuất thời khóa biểu...', 'info');
+        setTimeout(() => {
+            Utils.showToast('Đã xuất file Excel', 'success');
+        }, 1000);
     },
 
-    manualEdit() {
-        alert('Chế độ xếp tay: Click vào ô để thêm/sửa tiết học');
-    },
-
-    resolveConflict(type) {
-        alert(`Giải quyết xung đột ${type}`);
+    closeModal() {
+        document.querySelector('.modal-overlay')?.remove();
     }
 };
