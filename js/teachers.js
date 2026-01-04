@@ -42,15 +42,7 @@ const Teachers = {
                             <p>Môn học</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>${(allTeachers.reduce((sum, t) => sum + parseFloat(t.performance), 0) / allTeachers.length).toFixed(1)}</h3>
-                            <p>Đánh giá TB</p>
-                        </div>
-                    </div>
+
                     <div class="stat-card">
                         <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
                             <i class="fas fa-graduation-cap"></i>
@@ -88,7 +80,6 @@ const Teachers = {
                                 <th>Lớp phụ trách</th>
                                 <th>Kinh nghiệm</th>
                                 <th>Học vị</th>
-                                <th>Đánh giá</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
@@ -121,12 +112,6 @@ const Teachers = {
                 <td>${teacher.classes.join(', ')}</td>
                 <td>${teacher.experience} năm</td>
                 <td><span class="badge ${this.getDegreeBadge(teacher.degree)}">${teacher.degree}</span></td>
-                <td>
-                    <div class="rating">
-                        ${'⭐'.repeat(Math.round(teacher.performance))}
-                        <span>${teacher.performance}</span>
-                    </div>
-                </td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-icon" onclick="Teachers.view('${teacher.id}')" title="Xem chi tiết">
@@ -256,10 +241,6 @@ const Teachers = {
                             <div class="info-item">
                                 <label>Kinh nghiệm:</label>
                                 <span>${teacher.experience} năm</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Đánh giá:</label>
-                                <span>${'⭐'.repeat(Math.round(teacher.performance))} ${teacher.performance}</span>
                             </div>
                             <div class="info-item full-width">
                                 <label>Lớp phụ trách:</label>
