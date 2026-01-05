@@ -55,7 +55,7 @@ const Schedule = {
                 .schedule-cell { cursor: pointer; transition: background 0.2s; }
                 .schedule-cell:hover { background: #eef2ff; }
                 .empty-cell { height: 100%; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 12px; }
-                .class-block { padding: 8px; border-radius: 8px; height: 100%; display: flex; flex-direction: column; justify-content: center; color: white; font-size: 10px; }
+                .class-block { padding: 8px; border-radius: 8px; height: 100%; display: flex; flex-direction: column; justify-content: center; color: white; font-size: 10px; position: relative; }
                 .class-block.blue { background: #3b82f6; }
                 .class-block.purple { background: #8b5cf6; }
                 .class-block.orange { background: #f97316; }
@@ -64,6 +64,9 @@ const Schedule = {
                 .class-block.pink { background: #ec4899; }
                 .block-subject { font-weight: 700; margin: 0 0 4px 0; font-size: 11px; }
                 .block-teacher, .block-room, .block-class { margin: 2px 0; opacity: 0.9; }
+                .delete-class-btn { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(0,0,0,0.3); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; opacity: 0; transition: all 0.2s; }
+                .class-block:hover .delete-class-btn { opacity: 1; }
+                .delete-class-btn:hover { background: rgba(239, 68, 68, 0.9); transform: scale(1.1); }
             </style>
             <div class="schedule-page-ai">
                 <!-- Header -->
@@ -221,16 +224,18 @@ const Schedule = {
                                     return `
                                         <td class="schedule-cell ${schedule ? 'has-class' : ''}" 
                                             data-day="${dayIndex}" 
-                                            data-period="${periodIndex}"
-                                            onclick="Schedule.placeCourse(${dayIndex}, ${periodIndex})">
+                                            data-period="${periodIndex}">
                                             ${schedule ? `
-                                                <div class="class-block ${this.getColorClass(schedule.subject)}">
+                                                <div class="class-block ${this.getColorClass(schedule.subject)}" onclick="event.stopPropagation(); Schedule.viewScheduleDetail('${schedule.id}')">
+                                                    <button class="delete-class-btn" onclick="event.stopPropagation(); Schedule.quickDelete('${schedule.id}')" title="Xóa tiết học">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
                                                     <p class="block-subject">${schedule.subject}</p>
                                                     <p class="block-teacher">${schedule.teacherName}</p>
                                                     <p class="block-room">${schedule.room}</p>
                                                     ${this.selectedClass === 'all' ? `<p class="block-class">${schedule.className}</p>` : ''}
                                                 </div>
-                                            ` : '<div class="empty-cell"></div>'}
+                                            ` : `<div class="empty-cell" onclick="Schedule.placeCourse(${dayIndex}, ${periodIndex})"></div>`}
                                         </td>
                                     `;
                                 }).join('')}
@@ -246,6 +251,17 @@ const Schedule = {
         const colors = ['blue', 'purple', 'orange', 'green', 'red', 'pink'];
         const hash = subject.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         return colors[hash % colors.length];
+    },
+
+    quickDelete(scheduleId) {
+        const schedule = Database.schedules.find(s => s.id === scheduleId);
+        if (!schedule) return;
+
+        if (confirm(`Xóa tiết học "${schedule.subject}"?\n${schedule.day}, ${schedule.period}`)) {
+            Database.deleteSchedule(scheduleId);
+            Utils.showToast('Đã xóa tiết học', 'success');
+            this.render();
+        }
     },
 
     placeCourse(dayIndex, periodIndex) {
